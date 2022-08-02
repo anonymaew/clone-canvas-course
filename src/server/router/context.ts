@@ -1,28 +1,26 @@
-// src/server/router/context.ts
 import * as trpc from "@trpc/server";
-import * as trpcNext from "@trpc/server/adapters/next";
-import { unstable_getServerSession as getServerSession } from "next-auth";
+import { createUnprotectedRouter } from "./unprotect-router";
 
-import { authOptions as nextAuthOptions } from "../../pages/api/auth/[...nextauth]";
-import { prisma } from "../db/client";
-
-export const createContext = async (
-  opts?: trpcNext.CreateNextContextOptions,
-) => {
-  const req = opts?.req;
-  const res = opts?.res;
-
-  const session =
-    req && res && (await getServerSession(req, res, nextAuthOptions));
-
-  return {
-    req,
-    res,
-    session,
-    prisma,
-  };
-};
-
-type Context = trpc.inferAsyncReturnType<typeof createContext>;
-
-export const createRouter = () => trpc.router<Context>();
+/**
+ * Creates a tRPC router that asserts all queries and mutations are from an authorized user. Will throw an unauthorized error if a user is not signed in.
+ */
+export function createRouter() {
+  return createUnprotectedRouter().middleware(({ ctx, next }) => {
+    if (!ctx.session || !ctx.session.user || !ctx.session.user.id) {
+      throw new trpc.TRPCError({ code: "UNAUTHORIZED" });
+    }
+    return next({
+      ctx: {
+        ...ctx,
+        // infers that `session` is non-nullable to downstream resolvers
+        session: {
+          ...ctx.session,
+          user: {
+            ...ctx.session.user,
+            id: ctx.session.user.id,
+          },
+        },
+      },
+    });
+  });
+}

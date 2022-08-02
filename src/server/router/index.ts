@@ -1,10 +1,10 @@
 // src/server/router/index.ts
-import { createRouter } from "./context";
+import { createUnprotectedRouter } from "./unprotect-router";
 import superjson from "superjson";
 
-import { profileRouter } from "./profile";
+import { profileRouter } from "./subrouter/profile";
 
-export const appRouter = createRouter()
+export const appRouter = createUnprotectedRouter()
   .transformer(superjson)
   .merge("profile.", profileRouter);
 

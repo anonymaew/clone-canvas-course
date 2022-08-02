@@ -27,18 +27,18 @@ model Account {
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
+    id           String @id @default(cuid())
+    sessionToken String @unique
     userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    expires      BigInt
+    user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
     id                String              @id @default(cuid())
     name              String?
     email             String?             @unique
-    emailVerified     DateTime?
+    emailVerified     BigInt?
     role              Role                @default(STUDENT)
     content           String?
     image             String?
@@ -51,8 +51,8 @@ model User {
 
 model VerificationToken {
     identifier String
-    token      String   @unique
-    expires    DateTime
+    token      String @unique
+    expires    BigInt
 
     @@unique([identifier, token])
 }
@@ -67,11 +67,11 @@ model Course {
     id            String              @id @default(cuid())
     courseId      String              @unique
     title         String
-    created       DateTime
-    updated       DateTime
+    created       DateTime            @default(now())
+    updated       DateTime            @updatedAt
     published     Boolean             @default(false)
     price         Float?
-    content       String
+    content       String?
     lessons       Lesson[]
     announcements Announcement[]
     teachers      TeacherEnrollment[]
@@ -94,35 +94,42 @@ model StudentEnrollment {
     course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
+enum PaymentStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
 model Payment {
-    id             String   @id @default(cuid())
+    id             String        @id @default(cuid())
     userId         String
-    user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    courseId       String
     amount         Float?
     image          String?
-    approved       Boolean  @default(false)
-    approvedUserId String
-    created        DateTime
+    status         PaymentStatus @default(PENDING)
+    approvedUserId String?
+    created        DateTime      @default(now())
+    updated        DateTime      @updatedAt
 }
 
 model Lesson {
     id        String   @id @default(cuid())
-    lessonId  String   @unique
     courseId  String
     course    Course   @relation(fields: [courseId], references: [id])
     title     String
-    created   DateTime
-    updated   DateTime
+    created   DateTime @default(now())
+    updated   DateTime @updatedAt
     published Boolean  @default(false)
-    content   String
+    content   String?
 }
 
 model Announcement {
-    id         String   @id @default(cuid())
-    announceId String   @unique
+    id         String @id @default(cuid())
+    announceId String @unique
     courseId   String
-    course     Course   @relation(fields: [courseId], references: [id])
+    course     Course @relation(fields: [courseId], references: [id])
     title      String
-    announceAt DateTime
+    announceAt BigInt
     content    String
 }
