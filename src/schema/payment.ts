@@ -13,5 +13,8 @@ export type paymentCreateType = z.infer<typeof paymentCreateSchema>;
 
 export const paymentUpdateSchema = z.object({
   id: paymentIdSchema,
+  approvedUserId: z.string(),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
 });
+
+export type paymentUpdateType = z.infer<typeof paymentUpdateSchema>;

@@ -92,3 +92,29 @@ export const isTeacherEnrolled = async (
     props: { enrolled: true },
   };
 };
+
+export const isAdmin = async (ctx: GetServerSidePropsContext) => {
+  const checkLogin = await isLoggedIn(ctx);
+  if (checkLogin.redirect) return checkLogin;
+
+  const user = await prisma.user.findMany({
+    where: {
+      id: checkLogin.props.userId,
+      role: "ADMIN",
+    },
+  });
+
+  if (user.length === 0)
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+      props: {},
+    };
+
+  return {
+    redirect: false,
+    props: {},
+  };
+};

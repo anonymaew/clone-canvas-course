@@ -3,27 +3,31 @@ import { isStudentEnrolled } from "../../../utils/permission";
 import { trpc } from "../../../utils/trpc";
 import { useForm } from "react-hook-form";
 import { paymentCreateType } from "../../../schema/payment";
+import { useRouter } from "next/router";
 
-export default (props: { courseId: string }) => {
+export default () => {
+  const router = useRouter();
+  const courseId = router.query.courseId as string;
   const { data, isLoading } = trpc.useQuery(["payment.read.mine"]);
   const { handleSubmit, register } = useForm<paymentCreateType>();
   const {
     mutate,
     isLoading: submitting,
     error,
-  } = trpc.useMutation(["payment.create"]);
+  } = trpc.useMutation(["payment.create"], {
+    onSuccess: () => router.reload(),
+  });
 
   if (isLoading) return <p>Loading...</p>;
 
   if (!data) return <p>Something wrong</p>;
 
   const thisPayment = data.filter(
-    (payment) =>
-      payment.courseId === props.courseId && payment.status != "REJECTED"
+    (payment) => payment.courseId === courseId && payment.status != "REJECTED"
   )[0];
 
   const handleCreate = (values: paymentCreateType) => {
-    mutate({ ...values, courseId: props.courseId, amount: "0" });
+    mutate({ ...values, courseId: courseId, amount: "0" });
   };
   if (!thisPayment)
     return (

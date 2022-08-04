@@ -19,8 +19,8 @@ export default (props: { enrolled: boolean }) => {
   return (
     <div>
       <div>
-        <h1>{data.title || "Untitled"}</h1>
-        <p>{data.content || "Instructors have not put any content yet."}</p>
+        <h1>{data.title}</h1>
+        <p>{data.content}</p>
         {!props.enrolled && (
           <Link href={`/course/${courseId}/enroll`}>
             <button>Click to enroll</button>
