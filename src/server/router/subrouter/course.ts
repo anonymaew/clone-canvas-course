@@ -1,3 +1,4 @@
+import superjson from "superjson";
 import { createRouter } from "../context";
 import {
   courseIdSchema,
@@ -23,43 +24,73 @@ const courseCreateRouter = createRouter().mutation("", {
 });
 
 const courseReadRouter = createRouter()
-  .query("one", {
-    input: courseIdSchema,
-    async resolve({ ctx, input }) {
-      const id = input;
-
-      return await ctx.prisma.course.findFirst({
-        where: {
-          OR: [
-            {
+  .merge(
+    "study.",
+    createRouter()
+      .query("one", {
+        input: courseIdSchema,
+        async resolve({ ctx, input }) {
+          const id = input;
+          return await ctx.prisma.course.findFirst({
+            where: {
               id,
-              teachers: { some: { id: ctx.session.user.id } },
+              published: true,
             },
-            {
-              id,
+            include: {
+              students: {
+                select: {
+                  studentId: true,
+                },
+              },
+            },
+          });
+        },
+      })
+      .query("enroll", {
+        async resolve({ ctx }) {
+          return await ctx.prisma.course.findMany({
+            where: {
               students: { some: { id: ctx.session.user.id } },
               published: true,
             },
-          ],
+          });
         },
-      });
-    },
-  })
-  .query("many", {
-    async resolve({ ctx }) {
-      return await ctx.prisma.course.findMany({
-        where: {
-          OR: [
-            { teachers: { some: { id: ctx.session.user.id } } },
-            {
-              students: { some: { id: ctx.session.user.id } },
+      })
+      .query("many", {
+        async resolve({ ctx }) {
+          return await ctx.prisma.course.findMany({
+            where: {
               published: true,
             },
-          ],
+          });
         },
-      });
-    },
-  });
+      })
+  )
+  .merge(
+    "teach.",
+    createRouter()
+      .query("one", {
+        input: courseIdSchema,
+        async resolve({ ctx, input }) {
+          const id = input;
+          return await ctx.prisma.course.findFirst({
+            where: {
+              id,
+              teachers: { some: { teacherId: ctx.session.user.id } },
+            },
+          });
+        },
+      })
+      .query("many", {
+        async resolve({ ctx }) {
+          return await ctx.prisma.course.findMany({
+            where: {
+              teachers: { some: { teacherId: ctx.session.user.id } },
+            },
+          });
+        },
+      })
+  );
 
 const courseUpdateContentRouter = createRouter().mutation("", {
   input: courseSchema,
@@ -81,6 +112,7 @@ const courseDeleteRouter = createRouter().mutation("", {
 });
 
 export const courseRouter = createRouter()
+  .transformer(superjson)
   .merge("create", courseCreateRouter)
   .merge("read.", courseReadRouter)
   .merge("update", courseUpdateContentRouter)

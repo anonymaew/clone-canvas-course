@@ -3,6 +3,7 @@ import Head from "next/head";
 import { trpc } from "../utils/trpc";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
+import Navbar from "../components/Navbar";
 
 //login page
 const Home: NextPage = () => {
@@ -20,6 +21,7 @@ const Home: NextPage = () => {
     return (
       <div>
         <p>You're in!</p>
+        <Navbar />
         <button onClick={() => signOut()}>Sign out</button>
       </div>
     );

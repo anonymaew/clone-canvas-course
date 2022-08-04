@@ -7,6 +7,8 @@ export const lessonCreateSchema = z.object({
   courseId: z.string(),
 });
 
+export type lessonCreateType = z.infer<typeof lessonCreateSchema>;
+
 export const lessonSchema = z.object({
   id: lessonIdSchema,
   title: z.string(),

@@ -4,8 +4,9 @@ export const courseIdSchema = z.string();
 
 export const courseCreateSchema = z.object({
   title: z.string(),
-  courseId: courseIdSchema,
 });
+
+export type courseCreateType = z.infer<typeof courseCreateSchema>;
 
 export const courseSchema = z.object({
   id: courseIdSchema,

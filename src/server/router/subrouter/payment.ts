@@ -21,8 +21,7 @@ const paymentCreateRouter = createRouter().mutation("", {
 
 const paymentReadRouter = createRouter()
   .query("mine", {
-    input: paymentIdSchema,
-    async resolve({ ctx, input }) {
+    async resolve({ ctx }) {
       return await ctx.prisma.payment.findMany({
         where: {
           userId: ctx.session.user.id,
@@ -39,7 +38,7 @@ const paymentReadRouter = createRouter()
 const paymentUpdateRouter = createRouter().mutation("", {
   input: paymentUpdateSchema,
   async resolve({ ctx, input }) {
-    await ctx.prisma.payment.update({
+    const payment = await ctx.prisma.payment.update({
       where: {
         id: input.id,
       },
@@ -48,6 +47,14 @@ const paymentUpdateRouter = createRouter().mutation("", {
         approvedUserId: ctx.session.user.id,
       },
     });
+
+    if (input.status === "APPROVED")
+      await ctx.prisma.studentEnrollment.create({
+        data: {
+          studentId: ctx.session.user.id,
+          courseId: payment.courseId,
+        },
+      });
   },
 });
 

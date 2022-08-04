@@ -25,6 +25,7 @@ const lessonReadRouter = createRouter()
       return await ctx.prisma.lesson.findFirst({
         where: {
           id,
+          course: { students: { some: { studentId: ctx.session.user.id } } },
         },
       });
     },
@@ -36,6 +37,7 @@ const lessonReadRouter = createRouter()
       return await ctx.prisma.lesson.findMany({
         where: {
           courseId,
+          course: { students: { some: { studentId: ctx.session.user.id } } },
         },
       });
     },
@@ -44,9 +46,10 @@ const lessonReadRouter = createRouter()
 const lessonUpdateRouter = createRouter().mutation("", {
   input: lessonSchema,
   async resolve({ ctx, input }) {
-    await ctx.prisma.lesson.update({
+    await ctx.prisma.lesson.updateMany({
       where: {
         id: input.id,
+        course: { teachers: { some: { teacherId: ctx.session.user.id } } },
       },
       data: {
         ...input,
@@ -58,9 +61,10 @@ const lessonUpdateRouter = createRouter().mutation("", {
 const lessonDeleteRouter = createRouter().mutation("", {
   input: lessonIdSchema,
   async resolve({ ctx, input }) {
-    await ctx.prisma.lesson.delete({
+    await ctx.prisma.lesson.deleteMany({
       where: {
         id: input,
+        course: { teachers: { some: { teacherId: ctx.session.user.id } } },
       },
     });
   },
