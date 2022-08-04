@@ -5,7 +5,7 @@ export const paymentIdSchema = z.string();
 
 export const paymentCreateSchema = z.object({
   courseId: courseIdSchema,
-  amount: z.number(),
+  amount: z.string().nullable(),
   image: z.string(),
 });
 

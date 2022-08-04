@@ -2,67 +2,63 @@ import { trpc } from "../../../../utils/trpc";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { GetServerSidePropsContext } from "next";
+import { isTeacherEnrolled } from "../../../../utils/permission";
 import { lessonCreateType } from "../../../../schema/lesson";
+import { useForm } from "react-hook-form";
 
 export default () => {
   const router = useRouter();
-  const { handleSubmit, register } = useForm<lessonCreateType>();
   const courseId = router.query.courseId as string;
-  const { data: session, status } = useSession();
-  const {
-    mutate,
-    isLoading: submitting,
-    error,
-  } = trpc.useMutation(["lesson.create"], {
-    onSuccess: () => router.reload(),
-  });
   const { data: lessonListData, isLoading } = trpc.useQuery([
     "lesson.read.in-course",
     courseId,
   ]);
-  const lessonList =
-    lessonListData?.map((lesson) => {
-      return {
-        header: lesson.title,
-        url: `/teacher-dashboard/${courseId}/lesson/${lesson.id}`,
-      };
-    }) || [];
+  const {
+    mutate: createLesson,
+    isLoading: creating,
+    error: errorCreateLesson,
+  } = trpc.useMutation(["lesson.create"], {
+    onSuccess: () => router.reload(),
+  });
+  const { handleSubmit, register } = useForm<lessonCreateType>();
+  const handleCreate = (values: lessonCreateType) =>
+    createLesson({ ...values, courseId });
 
   if (isLoading) {
     return <p>Loading...</p>;
   }
 
-  if (status !== "loading" && !session) {
-    router.push("/login");
-  }
-
-  const handleCreate = (values: lessonCreateType) => {
-    mutate({ ...values, courseId });
-  };
+  if (!lessonListData) return <p>Something wrong</p>;
 
   return (
     <div>
       <div>
+        <h1>Lessons</h1>
         <form onSubmit={handleSubmit(handleCreate)}>
-          <input type="text" placeholder="title" {...register("title")} />
-          <button type="submit" disabled={submitting}>
-            Create
+          <label htmlFor="lessonName">lesson name:</label>
+          <input
+            type="text"
+            id="lessonName"
+            placeholder="title"
+            {...register("title")}
+          />
+          {errorCreateLesson && <p>{errorCreateLesson.message}</p>}
+          <button type="submit" disabled={creating}>
+            create a new lesson
           </button>
         </form>
-        <p>{error && error.message}</p>
-      </div>
-      <div>
-        <h1>Lessons</h1>
-        {lessonList.length === 0 ? (
+        {lessonListData.length === 0 ? (
           <p>No items</p>
         ) : (
           <ul>
-            {lessonList.map((item, index) => {
+            {lessonListData.map((item, index) => {
               return (
                 <li key={index}>
-                  <Link href={item.url}>
-                    <a>{item.header}</a>
+                  <Link
+                    href={`/teacher-dashboard/${courseId}/lesson/${item.id}`}
+                  >
+                    <a>{item.title}</a>
                   </Link>
                 </li>
               );
@@ -72,4 +68,9 @@ export default () => {
       </div>
     </div>
   );
+};
+
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+  const checkTeacherEnrolled = await isTeacherEnrolled(ctx, true);
+  return checkTeacherEnrolled;
 };

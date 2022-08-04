@@ -33,8 +33,3 @@ export default () => {
     </div>
   );
 };
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const session = await isLoggedIn(ctx);
-  return session;
-};

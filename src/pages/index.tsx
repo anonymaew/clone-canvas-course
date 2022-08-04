@@ -9,10 +9,6 @@ import Navbar from "../components/Navbar";
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
 
-  useEffect(() => {
-    console.log(session);
-  }, [session]);
-
   if (status === "loading") {
     return <p>Loading...</p>;
   }

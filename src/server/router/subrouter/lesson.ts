@@ -25,7 +25,19 @@ const lessonReadRouter = createRouter()
       return await ctx.prisma.lesson.findFirst({
         where: {
           id,
-          course: { students: { some: { studentId: ctx.session.user.id } } },
+          OR: [
+            {
+              course: {
+                students: { some: { studentId: ctx.session.user.id } },
+              },
+              published: true,
+            },
+            {
+              course: {
+                teachers: { some: { teacherId: ctx.session.user.id } },
+              },
+            },
+          ],
         },
       });
     },
@@ -33,11 +45,23 @@ const lessonReadRouter = createRouter()
   .query("in-course", {
     input: courseIdSchema,
     async resolve({ ctx, input }) {
-      const courseId = input;
+      const id = input;
       return await ctx.prisma.lesson.findMany({
         where: {
-          courseId,
-          course: { students: { some: { studentId: ctx.session.user.id } } },
+          id,
+          OR: [
+            {
+              course: {
+                students: { some: { studentId: ctx.session.user.id } },
+              },
+              published: true,
+            },
+            {
+              course: {
+                teachers: { some: { teacherId: ctx.session.user.id } },
+              },
+            },
+          ],
         },
       });
     },

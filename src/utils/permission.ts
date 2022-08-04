@@ -56,3 +56,39 @@ export const isStudentEnrolled = async (
     props: { enrolled: true },
   };
 };
+
+export const isTeacherEnrolled = async (
+  ctx: GetServerSidePropsContext,
+  redirect: boolean
+) => {
+  const checkLogin = await isLoggedIn(ctx);
+  if (checkLogin.redirect) return checkLogin;
+
+  const courseId = ctx.query.courseId as string;
+  const course = await prisma.teacherEnrollment.findMany({
+    where: {
+      courseId: courseId,
+      teacherId: checkLogin.props.userId,
+    },
+  });
+
+  if (course.length === 0) {
+    if (redirect)
+      return {
+        redirect: {
+          destination: `/teacher-dashboard`,
+          permanent: false,
+        },
+        props: { enrolled: false },
+      };
+    return {
+      redirect: false,
+      props: { enrolled: false },
+    };
+  }
+
+  return {
+    redirect: false,
+    props: { enrolled: true },
+  };
+};

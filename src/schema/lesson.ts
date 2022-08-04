@@ -15,3 +15,5 @@ export const lessonSchema = z.object({
   content: z.string(),
   published: z.boolean(),
 });
+
+export type lessonUpdateType = z.infer<typeof lessonSchema>;
