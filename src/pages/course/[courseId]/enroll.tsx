@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { paymentCreateType } from "../../../schema/payment";
 import { useRouter } from "next/router";
 
-export default () => {
+const EnrollPage = () => {
   const router = useRouter();
   const courseId = router.query.courseId as string;
   const { data, isLoading } = trpc.useQuery(["payment.read.mine"]);
@@ -50,3 +50,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkStudentEnrolled = await isStudentEnrolled(ctx, false);
   return checkStudentEnrolled;
 };
+
+export default EnrollPage;

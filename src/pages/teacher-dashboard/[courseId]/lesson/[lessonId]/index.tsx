@@ -3,14 +3,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { GetServerSidePropsContext } from "next";
-import {
-  isStudentEnrolled,
-  isTeacherEnrolled,
-} from "../../../../../utils/permission";
+import { isTeacherEnrolled } from "../../../../../utils/permission";
 import { lessonUpdateType } from "../../../../../schema/lesson";
 import { useForm } from "react-hook-form";
 
-export default () => {
+const LessonPage = () => {
   const router = useRouter();
   const courseId = router.query.courseId as string;
   const lessonId = router.query.lessonId as string;
@@ -83,3 +80,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkTeacherEnrolled = await isTeacherEnrolled(ctx, true);
   return checkTeacherEnrolled;
 };
+
+export default LessonPage;

@@ -8,7 +8,7 @@ interface PageListProps {
   }[];
 }
 
-export default (props: PageListProps) => {
+const PageList = (props: PageListProps) => {
   return (
     <div>
       <h1>{props.header}</h1>
@@ -30,3 +30,5 @@ export default (props: PageListProps) => {
     </div>
   );
 };
+
+export default PageList;

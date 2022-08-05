@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { courseUpdateType } from "../../../schema/course";
 import { useEffect, useRef, useState } from "react";
 
-export default (props: { enrolled: boolean }) => {
+const CoursePage = (props: { enrolled: boolean }) => {
   const router = useRouter();
   const courseId = router.query.courseId as string;
   const { data, isLoading } = trpc.useQuery([
@@ -95,3 +95,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkTeacherEnrolled = await isTeacherEnrolled(ctx, false);
   return checkTeacherEnrolled;
 };
+
+export default CoursePage;

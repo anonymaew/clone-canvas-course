@@ -7,7 +7,7 @@ import { courseUpdateType } from "../../../schema/course";
 import { useEffect, useRef, useState } from "react";
 import { paymentUpdateType } from "../../../schema/payment";
 
-export default () => {
+const PaymentList = () => {
   const router = useRouter();
   const { data: paymentList, isLoading } = trpc.useQuery(["payment.read.many"]);
   const {
@@ -56,3 +56,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkAdmin = await isAdmin(ctx);
   return checkAdmin;
 };
+
+export default PaymentList;

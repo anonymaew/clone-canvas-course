@@ -4,7 +4,7 @@ import { trpc } from "../../../utils/trpc";
 import { useForm } from "react-hook-form";
 import { paymentCreateType } from "../../../schema/payment";
 
-export default (props: { courseId: string }) => {
+const EnrollPage = (props: { courseId: string }) => {
   const { data, isLoading } = trpc.useQuery(["payment.read.mine"]);
   const { handleSubmit, register } = useForm<paymentCreateType>();
   const {
@@ -46,3 +46,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkStudentEnrolled = await isStudentEnrolled(ctx, false);
   return checkStudentEnrolled;
 };
+
+export default EnrollPage;

@@ -7,7 +7,7 @@ import { isTeacherEnrolled } from "../../../../utils/permission";
 import { lessonCreateType } from "../../../../schema/lesson";
 import { useForm } from "react-hook-form";
 
-export default () => {
+const LessonList = () => {
   const router = useRouter();
   const courseId = router.query.courseId as string;
   const { data: lessonListData, isLoading } = trpc.useQuery([
@@ -74,3 +74,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkTeacherEnrolled = await isTeacherEnrolled(ctx, true);
   return checkTeacherEnrolled;
 };
+
+export default LessonList;

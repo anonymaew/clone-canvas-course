@@ -5,7 +5,7 @@ import { GetServerSidePropsContext } from "next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { isLoggedIn } from "../../utils/permission";
 
-export default () => {
+const CourseList = () => {
   const { data, isLoading } = trpc.useQuery(["course.read.study.many"]);
 
   if (isLoading) return <p>Loading...</p>;
@@ -33,3 +33,5 @@ export default () => {
     </div>
   );
 };
+
+export default CourseList;

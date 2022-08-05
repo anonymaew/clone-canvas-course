@@ -4,7 +4,7 @@ import { GetServerSidePropsContext } from "next";
 import { isStudentEnrolled } from "../../../utils/permission";
 import { useRouter } from "next/router";
 
-export default (props: { enrolled: boolean }) => {
+const CoursePage = (props: { enrolled: boolean }) => {
   const router = useRouter();
   const courseId = router.query.courseId as string;
   const { data, isLoading } = trpc.useQuery([
@@ -35,3 +35,5 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const checkStudentEnrolled = await isStudentEnrolled(ctx, false);
   return checkStudentEnrolled;
 };
+
+export default CoursePage;

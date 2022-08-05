@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { courseCreateType } from "../../schema/course";
 
-export default () => {
+const CourseList = () => {
   const router = useRouter();
   const { data, isLoading } = trpc.useQuery(["course.read.teach.many"]);
   const {
@@ -67,3 +67,5 @@ export default () => {
     </div>
   );
 };
+
+export default CourseList;

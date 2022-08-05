@@ -16,7 +16,7 @@ const Home: NextPage = () => {
   if (session) {
     return (
       <div>
-        <p>You're in!</p>
+        <p>You&apos;re in!</p>
         <Navbar />
         <button onClick={() => signOut()}>Sign out</button>
       </div>
