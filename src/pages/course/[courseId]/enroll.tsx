@@ -1,9 +1,8 @@
-import { GetServerSidePropsContext } from "next";
-import { isStudentEnrolled } from "../../../utils/permission";
-import { trpc } from "../../../utils/trpc";
-import { useForm } from "react-hook-form";
-import { paymentCreateType } from "../../../schema/payment";
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+
+import { paymentCreateType } from '../../../schema/payment';
+import { trpc } from '../../../utils/trpc';
 
 const EnrollPage = () => {
   const router = useRouter();
@@ -44,11 +43,6 @@ const EnrollPage = () => {
     return <p>Your enrollment is waiting for a validation</p>;
 
   return <p>You are already enrolled</p>;
-};
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const checkStudentEnrolled = await isStudentEnrolled(ctx, false);
-  return checkStudentEnrolled;
 };
 
 export default EnrollPage;

@@ -1,56 +1,43 @@
-import { trpc } from "../../../../utils/trpc";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import { GetServerSidePropsContext } from "next";
-import { isStudentEnrolled } from "../../../../utils/permission";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+
+import BlogList from '../../../../components/blog/BlogList';
+import { trpc } from '../../../../utils/trpc';
 
 const LessonList = () => {
   const router = useRouter();
+  const { status } = useSession();
   const courseId = router.query.courseId as string;
-  const { data: lessonListData, isLoading } = trpc.useQuery([
+  const { data, isLoading: lessonLoading } = trpc.useQuery([
     "lesson.read.in-course",
     courseId,
   ]);
-  const lessonList =
-    lessonListData?.map((lesson) => {
-      return {
-        header: lesson.title,
-        url: `/course/${courseId}/lesson/${lesson.id}`,
-      };
-    }) || [];
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  const lessonListData = {
+    list:
+      data !== undefined
+        ? data.map((lesson) => {
+            return {
+              title: lesson.title,
+              created: lesson.created,
+              updated: lesson.updated,
+              link: `/course/${courseId}/lesson/${lesson.id}`,
+            };
+          })
+        : [],
+  };
+  const { data: enrolled, isLoading: checkLoading } = trpc.useQuery([
+    "check.study",
+    courseId,
+  ]);
 
   return (
-    <div>
-      <div>
-        <h1>Lessons</h1>
-        {lessonList.length === 0 ? (
-          <p>No items</p>
-        ) : (
-          <ul>
-            {lessonList.map((item, index) => {
-              return (
-                <li key={index}>
-                  <Link href={item.url}>
-                    <a>{item.header}</a>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-    </div>
+    <BlogList
+      data={lessonListData}
+      loading={lessonLoading || checkLoading || status === "loading"}
+      enrollLink={`${courseId}/enroll`}
+      enrolled={enrolled !== undefined && enrolled.length !== 0}
+    />
   );
-};
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const checkStudentEnrolled = await isStudentEnrolled(ctx, true);
-  return checkStudentEnrolled;
 };
 
 export default LessonList;

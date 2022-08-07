@@ -1,37 +1,36 @@
-import { trpc } from "../../utils/trpc";
-import { unstable_getServerSession as getServerSession } from "next-auth";
-import Link from "next/link";
-import { GetServerSidePropsContext } from "next";
-import { authOptions } from "../api/auth/[...nextauth]";
-import { isLoggedIn } from "../../utils/permission";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
-const CourseList = () => {
-  const { data, isLoading } = trpc.useQuery(["course.read.study.many"]);
+import BlogList from '../../components/blog/BlogList';
+import { trpc } from '../../utils/trpc';
 
-  if (isLoading) return <p>Loading...</p>;
+const LessonList = () => {
+  const router = useRouter();
+  const { status } = useSession();
+  const { data, isLoading: courseLoading } = trpc.useQuery([
+    "course.read.study.enroll",
+  ]);
+  const courseListData = {
+    list:
+      data?.map((course) => {
+        return {
+          id: course.id,
+          title: course.title,
+          created: course.created,
+          updated: course.updated,
+          link: `/course/${course.id}`,
+        };
+      }) || [],
+  };
 
   return (
-    <div>
-      <div>
-        <h1>Courses</h1>
-        {data === undefined || data.length === 0 ? (
-          <p>No items</p>
-        ) : (
-          <ul>
-            {data.map((item, index) => {
-              return (
-                <li key={index}>
-                  <Link href={`/course/${item.id}`}>
-                    <a>{item.title}</a>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-    </div>
+    <BlogList
+      data={courseListData}
+      loading={courseLoading || status === "loading"}
+      enrollLink={`/`}
+      enrolled={true}
+    />
   );
 };
 
-export default CourseList;
+export default LessonList;

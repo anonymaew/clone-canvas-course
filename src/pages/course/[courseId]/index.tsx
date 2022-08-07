@@ -1,39 +1,31 @@
-import { trpc } from "../../../utils/trpc";
-import Link from "next/link";
-import { GetServerSidePropsContext } from "next";
-import { isStudentEnrolled } from "../../../utils/permission";
-import { useRouter } from "next/router";
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-const CoursePage = (props: { enrolled: boolean }) => {
+import BlogPage from '../../../components/blog/BlogPage';
+import { trpc } from '../../../utils/trpc';
+
+const CoursePage = () => {
   const router = useRouter();
+  const { status } = useSession();
   const courseId = router.query.courseId as string;
-  const { data, isLoading } = trpc.useQuery([
+  const { data: courseData, isLoading: courseLoading } = trpc.useQuery([
     "course.read.study.one",
     courseId,
   ]);
-
-  if (isLoading) return <p>Loading...</p>;
-
-  if (!data) return <p>something wrong</p>;
+  const { data: enrolled, isLoading: checkLoading } = trpc.useQuery([
+    "check.study",
+    courseId,
+  ]);
 
   return (
-    <div>
-      <div>
-        <h1>{data.title}</h1>
-        <p>{data.content}</p>
-        {!props.enrolled && (
-          <Link href={`/course/${courseId}/enroll`}>
-            <button>Click to enroll</button>
-          </Link>
-        )}
-      </div>
-    </div>
+    <BlogPage
+      data={courseData}
+      loading={courseLoading || checkLoading || status === "loading"}
+      enrollLink={`${courseId}/enroll`}
+      enrolled={enrolled !== undefined && enrolled.length !== 0}
+    />
   );
-};
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const checkStudentEnrolled = await isStudentEnrolled(ctx, false);
-  return checkStudentEnrolled;
 };
 
 export default CoursePage;

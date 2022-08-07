@@ -1,10 +1,6 @@
-import { createRouter } from "../context";
-import {
-  lessonIdSchema,
-  lessonCreateSchema,
-  lessonSchema,
-} from "../../../schema/lesson";
-import { courseIdSchema } from "../../../schema/course";
+import { courseIdSchema } from '../../../schema/course';
+import { lessonCreateSchema, lessonIdSchema, lessonSchema } from '../../../schema/lesson';
+import { createRouter } from '../context';
 
 const lessonCreateRouter = createRouter().mutation("", {
   input: lessonCreateSchema,
@@ -48,13 +44,12 @@ const lessonReadRouter = createRouter()
       const id = input;
       return await ctx.prisma.lesson.findMany({
         where: {
-          id,
+          courseId: id,
           OR: [
             {
               course: {
                 students: { some: { studentId: ctx.session.user.id } },
               },
-              published: true,
             },
             {
               course: {

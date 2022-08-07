@@ -1,10 +1,7 @@
-import superjson from "superjson";
-import { createRouter } from "../context";
-import {
-  courseIdSchema,
-  courseCreateSchema,
-  courseSchema,
-} from "../../../schema/course";
+import superjson from 'superjson';
+
+import { courseCreateSchema, courseIdSchema, courseSchema } from '../../../schema/course';
+import { createRouter } from '../context';
 
 const courseCreateRouter = createRouter().mutation("", {
   input: courseCreateSchema,
@@ -35,13 +32,6 @@ const courseReadRouter = createRouter()
             where: {
               id,
               published: true,
-            },
-            include: {
-              students: {
-                select: {
-                  studentId: true,
-                },
-              },
             },
           });
         },
