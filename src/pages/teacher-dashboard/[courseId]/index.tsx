@@ -1,16 +1,17 @@
-import { trpc } from "../../../utils/trpc";
-import Link from "next/link";
-import { GetServerSidePropsContext } from "next";
-import { isTeacherEnrolled } from "../../../utils/permission";
-import { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
-import { courseUpdateType } from "../../../schema/course";
-import { useEffect, useRef, useState } from "react";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { useRef } from 'react';
+import { useForm } from 'react-hook-form';
+
+import BlogPage from '../../../components/blog/BlogPage';
+import { courseUpdateType } from '../../../schema/course';
+import { trpc } from '../../../utils/trpc';
 
 const CoursePage = (props: { enrolled: boolean }) => {
   const router = useRouter();
+  const { status } = useSession();
   const courseId = router.query.courseId as string;
-  const { data, isLoading } = trpc.useQuery([
+  const { data, isLoading: courseLoading } = trpc.useQuery([
     "course.read.teach.one",
     courseId,
   ]);
@@ -21,6 +22,10 @@ const CoursePage = (props: { enrolled: boolean }) => {
   } = trpc.useMutation(["course.update"], {
     onSuccess: () => router.reload(),
   });
+  const { data: enrolled, isLoading: checkLoading } = trpc.useQuery([
+    "check.teach",
+    courseId,
+  ]);
   const { handleSubmit, register } = useForm<courseUpdateType>();
   const handleUpdate = (values: courseUpdateType) =>
     updateCourse({
@@ -30,70 +35,60 @@ const CoursePage = (props: { enrolled: boolean }) => {
     });
   const validationRef = useRef<HTMLInputElement>(null);
 
-  if (isLoading) return <p>Loading...</p>;
-
-  if (!data) return <p>something wrong</p>;
-
   return (
     <div>
       <div>
-        <h1>{data.title}</h1>
-        <p>{data.content}</p>
-        {!props.enrolled && (
-          <Link href={`/course/${courseId}/enroll`}>
-            <button>Click to enroll</button>
-          </Link>
+        {data && (
+          <form onSubmit={handleSubmit(handleUpdate)}>
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              id="title"
+              defaultValue={data.title}
+              {...register("title")}
+            />
+            <label htmlFor="validation">Require validation</label>
+            <input
+              type="checkbox"
+              id="validation"
+              defaultChecked={data.price !== null}
+              ref={validationRef}
+            />
+            <label htmlFor="price">Price</label>
+            <input
+              type="number"
+              id="price"
+              defaultValue={data.price || 0}
+              {...register("price")}
+            />
+            <label htmlFor="published">Published</label>
+            <input
+              type="checkbox"
+              id="published"
+              defaultChecked={data.published}
+              {...register("published")}
+            />
+            <label htmlFor="content">Content</label>
+            <textarea
+              id="content"
+              defaultValue={data.content}
+              {...register("content")}
+            />
+            {errorUpdatingCourse && <p>{errorUpdatingCourse.message}</p>}
+            <button type="submit" disabled={updating}>
+              save
+            </button>
+          </form>
         )}
-      </div>
-      <div>
-        <form onSubmit={handleSubmit(handleUpdate)}>
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            defaultValue={data.title}
-            {...register("title")}
-          />
-          <label htmlFor="validation">Require validation</label>
-          <input
-            type="checkbox"
-            id="validation"
-            defaultChecked={data.price !== null}
-            ref={validationRef}
-          />
-          <label htmlFor="price">Price</label>
-          <input
-            type="number"
-            id="price"
-            defaultValue={data.price || 0}
-            {...register("price")}
-          />
-          <label htmlFor="published">Published</label>
-          <input
-            type="checkbox"
-            id="published"
-            defaultChecked={data.published}
-            {...register("published")}
-          />
-          <label htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            defaultValue={data.content}
-            {...register("content")}
-          />
-          {errorUpdatingCourse && <p>{errorUpdatingCourse.message}</p>}
-          <button type="submit" disabled={updating}>
-            save
-          </button>
-        </form>
+        <BlogPage
+          data={data}
+          loading={courseLoading || checkLoading || status === "loading"}
+          enrollLink={`/teacher-dashboard`}
+          enrolled={enrolled !== undefined && enrolled.length !== 0}
+        />
       </div>
     </div>
   );
-};
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const checkTeacherEnrolled = await isTeacherEnrolled(ctx, false);
-  return checkTeacherEnrolled;
 };
 
 export default CoursePage;

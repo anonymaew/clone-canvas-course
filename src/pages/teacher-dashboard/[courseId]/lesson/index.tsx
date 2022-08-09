@@ -1,19 +1,34 @@
-import { trpc } from "../../../../utils/trpc";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import { GetServerSidePropsContext } from "next";
-import { isTeacherEnrolled } from "../../../../utils/permission";
-import { lessonCreateType } from "../../../../schema/lesson";
-import { useForm } from "react-hook-form";
+import { GetServerSidePropsContext } from 'next';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+
+import BlogList from '../../../../components/blog/BlogList';
+import { lessonCreateType } from '../../../../schema/lesson';
+import { trpc } from '../../../../utils/trpc';
 
 const LessonList = () => {
   const router = useRouter();
+  const { status } = useSession();
   const courseId = router.query.courseId as string;
-  const { data: lessonListData, isLoading } = trpc.useQuery([
+  const { data, isLoading: lessonLoading } = trpc.useQuery([
     "lesson.read.in-course",
     courseId,
   ]);
+  const lessonListData = {
+    list:
+      data !== undefined
+        ? data.map((lesson) => {
+            return {
+              title: lesson.title,
+              created: lesson.created,
+              updated: lesson.updated,
+              link: `/teacher-dashboard/${courseId}/lesson/${lesson.id}`,
+            };
+          })
+        : [],
+  };
   const {
     mutate: createLesson,
     isLoading: creating,
@@ -21,15 +36,14 @@ const LessonList = () => {
   } = trpc.useMutation(["lesson.create"], {
     onSuccess: () => router.reload(),
   });
+  const { data: enrolled, isLoading: checkLoading } = trpc.useQuery([
+    "check.teach",
+    courseId,
+  ]);
+
   const { handleSubmit, register } = useForm<lessonCreateType>();
   const handleCreate = (values: lessonCreateType) =>
     createLesson({ ...values, courseId });
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!lessonListData) return <p>Something wrong</p>;
 
   return (
     <div>
@@ -48,31 +62,13 @@ const LessonList = () => {
             create a new lesson
           </button>
         </form>
-        {lessonListData.length === 0 ? (
-          <p>No items</p>
-        ) : (
-          <ul>
-            {lessonListData.map((item, index) => {
-              return (
-                <li key={index}>
-                  <Link
-                    href={`/teacher-dashboard/${courseId}/lesson/${item.id}`}
-                  >
-                    <a>{item.title}</a>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <BlogList
+          data={lessonListData}
+          loading={lessonLoading || checkLoading || status === "loading"}
+          enrollLink={`/teacher-dashboard/`}
+          enrolled={enrolled !== undefined && enrolled.length !== 0}
+        />
       </div>
     </div>
   );
 };
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const checkTeacherEnrolled = await isTeacherEnrolled(ctx, true);
-  return checkTeacherEnrolled;
-};
-
-export default LessonList;

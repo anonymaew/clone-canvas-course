@@ -16,7 +16,18 @@ const isStudentEnrolledRouter = createRouter().query("", {
   },
 });
 
-const isTeacherEnrolled = createRouter().query("", {
+const isTeacherRouter = createRouter().query("", {
+  async resolve({ ctx }) {
+    return await ctx.prisma.user.findMany({
+      where: {
+        id: ctx.session.user.id,
+        role: "TEACHER",
+      },
+    });
+  },
+});
+
+const isTeacherEnrolledRouter = createRouter().query("", {
   input: courseIdSchema,
   async resolve({ ctx, input }) {
     return await ctx.prisma.teacherEnrollment.findMany({
@@ -28,7 +39,7 @@ const isTeacherEnrolled = createRouter().query("", {
   },
 });
 
-const isAdmin = createRouter().query("", {
+const isAdminRouter = createRouter().query("", {
   async resolve({ ctx }) {
     await ctx.prisma.user.findMany({
       where: {
@@ -42,5 +53,6 @@ const isAdmin = createRouter().query("", {
 export const checkRouter = createRouter()
   .transformer(superjson)
   .merge("study", isStudentEnrolledRouter)
-  .merge("teach", isTeacherEnrolled)
-  .merge("admin", isAdmin);
+  .merge("teach", isTeacherEnrolledRouter)
+  .merge("teacher", isTeacherRouter)
+  .merge("admin", isAdminRouter);
