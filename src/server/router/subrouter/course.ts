@@ -40,7 +40,7 @@ const courseReadRouter = createRouter()
         async resolve({ ctx }) {
           return await ctx.prisma.course.findMany({
             where: {
-              students: { some: { id: ctx.session.user.id } },
+              students: { some: { studentId: ctx.session.user.id } },
               published: true,
             },
           });

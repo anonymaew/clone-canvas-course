@@ -1,11 +1,11 @@
-import { trpc } from "../../../utils/trpc";
-import Link from "next/link";
-import { GetServerSidePropsContext } from "next";
-import { isAdmin } from "../../../utils/permission";
-import { useRouter } from "next/router";
-import { courseUpdateType } from "../../../schema/course";
-import { useEffect, useRef, useState } from "react";
-import { paymentUpdateType } from "../../../schema/payment";
+import { GetServerSidePropsContext } from 'next';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
+
+import { courseUpdateType } from '../../../schema/course';
+import { paymentUpdateType } from '../../../schema/payment';
+import { trpc } from '../../../utils/trpc';
 
 const PaymentList = () => {
   const router = useRouter();
@@ -50,11 +50,6 @@ const PaymentList = () => {
       </ul>
     </div>
   );
-};
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const checkAdmin = await isAdmin(ctx);
-  return checkAdmin;
 };
 
 export default PaymentList;

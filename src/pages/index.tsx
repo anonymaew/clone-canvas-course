@@ -1,9 +1,10 @@
 import type { NextPage } from "next";
-import Head from "next/head";
-import { trpc } from "../utils/trpc";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { useEffect } from "react";
-import Navbar from "../components/Navbar";
+import { signIn, signOut, useSession } from 'next-auth/react';
+import Head from 'next/head';
+import { useEffect } from 'react';
+
+import Navbar from '../components/Navbar';
+import { trpc } from '../utils/trpc';
 
 //login page
 const Home: NextPage = () => {
@@ -23,12 +24,12 @@ const Home: NextPage = () => {
     );
   } else
     return (
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col items-center justify-center">
         <Head>
           <title>Home</title>
         </Head>
         <h1>Home</h1>
-        <button onClick={() => signIn()}>Sign in</button>
+        <button onClick={() => signIn("google")}>Sign in</button>
       </div>
     );
 };

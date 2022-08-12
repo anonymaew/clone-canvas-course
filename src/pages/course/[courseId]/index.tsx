@@ -2,6 +2,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import BlogNavbar from '../../../components/blog/BlogNavbar';
 import BlogPage from '../../../components/blog/BlogPage';
 import { trpc } from '../../../utils/trpc';
 
@@ -19,12 +20,14 @@ const CoursePage = () => {
   ]);
 
   return (
-    <BlogPage
-      data={courseData}
-      loading={courseLoading || checkLoading || status === "loading"}
-      enrollLink={`${courseId}/enroll`}
-      enrolled={enrolled !== undefined && enrolled.length !== 0}
-    />
+    <>
+      <BlogPage
+        data={courseData}
+        loading={courseLoading || checkLoading || status === "loading"}
+        enrollLink={`${courseId}/enroll`}
+        enrolled={enrolled !== undefined && enrolled.length !== 0}
+      />
+    </>
   );
 };
 

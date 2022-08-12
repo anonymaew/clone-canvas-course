@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 
 import BlogList from '../../components/blog/BlogList';
+import BlogListForm from '../../components/blog/BlogListForm';
 import { courseCreateType } from '../../schema/course';
 import { trpc } from '../../utils/trpc';
 
@@ -40,30 +42,26 @@ const CourseList = () => {
   const { data: isTeacher, isLoading: checkLoading } = trpc.useQuery([
     "check.teacher",
   ]);
-  const { handleSubmit, register } = useForm<courseCreateType>();
-  const handleCreate = (values: courseCreateType) => createCourse(values);
+
+  const handleCreate = (title: string) => {
+    createCourse({ title });
+  };
+  const handleDelete = (id: string) => {
+    deleteCourse(id);
+  };
 
   return (
     <>
-      <h1>Courses</h1>
-      <form onSubmit={handleSubmit(handleCreate)}>
-        <label htmlFor="courseName">course name:</label>
-        <input
-          type="text"
-          id="courseName"
-          placeholder="title"
-          {...register("title")}
-        />
-        {errorCreateCourse && <p>{errorCreateCourse.message}</p>}
-        <button type="submit" disabled={creating}>
-          create a new course
-        </button>
-      </form>
-      <BlogList
+      <h1 className="text-4xl font-bold text-center text-violet-500">
+        Courses
+      </h1>
+      <BlogListForm
         data={courseListData}
         loading={readingCourse || checkLoading}
         enrollLink={`/`}
         enrolled={isTeacher !== undefined && isTeacher.length !== 0}
+        handleCreate={handleCreate}
+        handleDelete={handleDelete}
       />
     </>
   );

@@ -18,26 +18,24 @@ const BlogList = (props: {
   enrolled: boolean;
 }) => {
   return (
-    <div>
+    <>
       {!props.loading && props.data !== undefined && props.data !== null ? (
-        <>
-          <h1>List</h1>
-          <div>
-            {props.data.list.map((item, index) => (
-              <Link href={item.link} key={index}>
-                <div key={item.link}>
-                  <h2>{item.title}</h2>
-                  <p>{item.created.toLocaleString()}</p>
-                  <p>{item.updated.toLocaleString()}</p>
+        <div>
+          {props.data.list.map((item, index) => (
+            <Link href={item.link} key={index}>
+              <div className="p-4 m-4 duration-300 ease-in-out border rounded-md shadow-md cursor-pointer hover:scale-105 hover:bg-slate-300 border-slate-300">
+                <h2 className="text-2xl font-bold underline">{item.title}</h2>
+                <div className="text-sm text-slate-500">
+                  <p>{item.created.toLocaleDateString()}</p>
                 </div>
-              </Link>
-            ))}
-          </div>
-        </>
+              </div>
+            </Link>
+          ))}
+        </div>
       ) : (
         <TextSkeleton />
       )}
-    </div>
+    </>
   );
 };
 

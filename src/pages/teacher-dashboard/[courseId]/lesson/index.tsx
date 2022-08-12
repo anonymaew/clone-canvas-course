@@ -1,10 +1,8 @@
-import { GetServerSidePropsContext } from 'next';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 
-import BlogList from '../../../../components/blog/BlogList';
+import BlogListForm from '../../../../components/blog/BlogListForm';
 import { lessonCreateType } from '../../../../schema/lesson';
 import { trpc } from '../../../../utils/trpc';
 
@@ -21,6 +19,7 @@ const LessonList = () => {
       data !== undefined
         ? data.map((lesson) => {
             return {
+              id: lesson.id,
               title: lesson.title,
               created: lesson.created,
               updated: lesson.updated,
@@ -36,39 +35,40 @@ const LessonList = () => {
   } = trpc.useMutation(["lesson.create"], {
     onSuccess: () => router.reload(),
   });
+  const {
+    mutate: deleteLesson,
+    isLoading: deleting,
+    error: errorDeleting,
+  } = trpc.useMutation(["lesson.delete"], {
+    onSuccess: () => router.reload(),
+  });
   const { data: enrolled, isLoading: checkLoading } = trpc.useQuery([
     "check.teach",
     courseId,
   ]);
 
-  const { handleSubmit, register } = useForm<lessonCreateType>();
-  const handleCreate = (values: lessonCreateType) =>
-    createLesson({ ...values, courseId });
+  const handleCreate = (title: string) => {
+    createLesson({ title, courseId });
+  };
+  const handleDelete = (id: string) => {
+    deleteLesson(id);
+  };
 
   return (
-    <div>
-      <div>
-        <h1>Lessons</h1>
-        <form onSubmit={handleSubmit(handleCreate)}>
-          <label htmlFor="lessonName">lesson name:</label>
-          <input
-            type="text"
-            id="lessonName"
-            placeholder="title"
-            {...register("title")}
-          />
-          {errorCreateLesson && <p>{errorCreateLesson.message}</p>}
-          <button type="submit" disabled={creating}>
-            create a new lesson
-          </button>
-        </form>
-        <BlogList
-          data={lessonListData}
-          loading={lessonLoading || checkLoading || status === "loading"}
-          enrollLink={`/teacher-dashboard/`}
-          enrolled={enrolled !== undefined && enrolled.length !== 0}
-        />
-      </div>
-    </div>
+    <>
+      <h1 className="text-4xl font-bold text-center text-violet-500">
+        Lessons
+      </h1>
+      <BlogListForm
+        data={lessonListData}
+        loading={lessonLoading || checkLoading || status === "loading"}
+        enrollLink={`/teacher-dashboard/`}
+        enrolled={enrolled !== undefined && enrolled.length !== 0}
+        handleCreate={handleCreate}
+        handleDelete={handleDelete}
+      />
+    </>
   );
 };
+
+export default LessonList;
