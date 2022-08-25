@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import BlogList from '../../components/blog/BlogList';
+import Navbar from '../../components/blog/Navbar';
 import { trpc } from '../../utils/trpc';
 
 const LessonList = () => {
@@ -17,7 +18,6 @@ const LessonList = () => {
       title: string;
       created: Date;
       updated: Date;
-      link: string;
     }[];
   }>({ list: [] });
   useEffect(() => {
@@ -29,24 +29,25 @@ const LessonList = () => {
             title: course.title,
             created: course.created,
             updated: course.updated,
-            link: `/course/${course.id}`,
           };
         }),
       });
   }, [courseLoading]);
 
   return (
-    <>
-      <h1 className="text-4xl font-bold text-center text-violet-500">
-        Your courses
-      </h1>
-      <BlogList
-        data={courseListData}
-        loading={courseLoading || status === "loading"}
-        enrollLink={`/`}
-        enrolled={true}
-      />
-    </>
+    <Navbar>
+      <>
+        <h1 className="text-4xl font-bold text-center text-violet-500">
+          Your courses
+        </h1>
+        <BlogList
+          data={courseListData}
+          loading={courseLoading || status === "loading"}
+          enrollLink={`/`}
+          enrolled={true}
+        />
+      </>
+    </Navbar>
   );
 };
 

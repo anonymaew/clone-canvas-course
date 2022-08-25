@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import BlogPage from '../../../../../components/blog/BlogPage';
+import Navbar from '../../../../../components/blog/Navbar';
 import { trpc } from '../../../../../utils/trpc';
 
 const LessonPage = () => {
@@ -20,12 +21,14 @@ const LessonPage = () => {
   ]);
 
   return (
-    <BlogPage
-      data={lessonData}
-      loading={lessonLoading || checkLoading || status === "loading"}
-      enrollLink={`${courseId}/enroll`}
-      enrolled={enrolled !== undefined && enrolled.length !== 0}
-    />
+    <Navbar>
+      <BlogPage
+        data={lessonData}
+        loading={lessonLoading || checkLoading || status === "loading"}
+        enrollLink={`${courseId}/enroll`}
+        enrolled={enrolled !== undefined && enrolled.length !== 0}
+      />
+    </Navbar>
   );
 };
 

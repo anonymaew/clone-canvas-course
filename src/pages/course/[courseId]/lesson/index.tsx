@@ -2,6 +2,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 
 import BlogList from '../../../../components/blog/BlogList';
+import Navbar from '../../../../components/blog/Navbar';
 import { trpc } from '../../../../utils/trpc';
 
 const LessonList = () => {
@@ -17,10 +18,10 @@ const LessonList = () => {
       data !== undefined
         ? data.map((lesson) => {
             return {
+              id: lesson.id,
               title: lesson.title,
               created: lesson.created,
               updated: lesson.updated,
-              link: `/course/${courseId}/lesson/${lesson.id}`,
             };
           })
         : [],
@@ -31,12 +32,14 @@ const LessonList = () => {
   ]);
 
   return (
-    <BlogList
-      data={lessonListData}
-      loading={lessonLoading || checkLoading || status === "loading"}
-      enrollLink={`${courseId}/enroll`}
-      enrolled={enrolled !== undefined && enrolled.length !== 0}
-    />
+    <Navbar>
+      <BlogList
+        data={lessonListData}
+        loading={lessonLoading || checkLoading || status === "loading"}
+        enrollLink={`${courseId}/enroll`}
+        enrolled={enrolled !== undefined && enrolled.length !== 0}
+      />
+    </Navbar>
   );
 };
 

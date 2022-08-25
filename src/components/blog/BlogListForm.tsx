@@ -8,7 +8,6 @@ interface BlogListProps {
   list: {
     id: string;
     title: string;
-    link: string;
     created: Date;
     updated: Date;
   }[];
