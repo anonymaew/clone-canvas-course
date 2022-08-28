@@ -63,14 +63,30 @@ enum Role {
     STUDENT
 }
 
+model BlogHeader {
+    id            String         @id @default(cuid())
+    title         String
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    blogContentId String         @unique
+    blogContent   BlogContent    @relation(fields: [blogContentId], references: [id], onDelete: Cascade)
+    Course        Course?
+    Lesson        Lesson[]
+    Announcement  Announcement[]
+}
+
+model BlogContent {
+    id         String      @id @default(cuid())
+    content    String      @default("")
+    BlogHeader BlogHeader?
+}
+
 model Course {
     id            String              @id @default(cuid())
-    title         String
-    created       DateTime            @default(now())
-    updated       DateTime            @updatedAt
+    blogHeaderId  String              @unique
+    blogHeader    BlogHeader          @relation(fields: [blogHeaderId], references: [id], onDelete: Cascade)
     published     Boolean             @default(false)
     price         String?
-    content       String              @default("")
     lessons       Lesson[]
     announcements Announcement[]
     teachers      TeacherEnrollment[]
@@ -113,22 +129,18 @@ model Payment {
 }
 
 model Lesson {
-    id        String   @id @default(cuid())
-    courseId  String
-    course    Course   @relation(fields: [courseId], references: [id])
-    title     String
-    created   DateTime @default(now())
-    updated   DateTime @updatedAt
-    published Boolean  @default(false)
-    content   String   @default("")
+    id           String     @id @default(cuid())
+    courseId     String
+    course       Course     @relation(fields: [courseId], references: [id])
+    blogHeaderId String     @unique
+    blogHeader   BlogHeader @relation(fields: [blogHeaderId], references: [id])
 }
 
 model Announcement {
-    id         String @id @default(cuid())
-    announceId String @unique
-    courseId   String
-    course     Course @relation(fields: [courseId], references: [id])
-    title      String
-    announceAt BigInt
-    content    String @default("")
+    id           String     @id @default(cuid())
+    courseId     String
+    course       Course     @relation(fields: [courseId], references: [id])
+    remindAt     DateTime
+    blogHeaderId String     @unique
+    blogHeader   BlogHeader @relation(fields: [blogHeaderId], references: [id])
 }

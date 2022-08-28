@@ -22,7 +22,11 @@ const CoursePage = () => {
 
   return (
     <Navbar
-      course={courseData ? { name: courseData.title, id: courseId } : undefined}
+      course={
+        courseData
+          ? { name: courseData.blogHeader.title, id: courseId }
+          : undefined
+      }
     >
       <BlogPage
         data={courseData}

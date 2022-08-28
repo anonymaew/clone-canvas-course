@@ -12,27 +12,6 @@ const LessonList = () => {
   const { data, isLoading: courseLoading } = trpc.useQuery([
     "course.read.study.enroll",
   ]);
-  const [courseListData, setCourseListData] = useState<{
-    list: {
-      id: string;
-      title: string;
-      created: Date;
-      updated: Date;
-    }[];
-  }>({ list: [] });
-  useEffect(() => {
-    if (!courseLoading && data !== undefined)
-      setCourseListData({
-        list: data.map((course) => {
-          return {
-            id: course.id,
-            title: course.title,
-            created: course.created,
-            updated: course.updated,
-          };
-        }),
-      });
-  }, [courseLoading]);
 
   return (
     <Navbar>
@@ -41,7 +20,7 @@ const LessonList = () => {
           Your courses
         </h1>
         <BlogList
-          data={courseListData}
+          data={data}
           loading={courseLoading || status === "loading"}
           enrollLink={`/`}
           enrolled={true}

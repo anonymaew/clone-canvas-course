@@ -1,20 +1,28 @@
 import superjson from 'superjson';
+import { z } from 'zod';
 
+import { blogSchema } from '../../../schema/blog';
 import { courseCreateSchema, courseIdSchema, courseSchema } from '../../../schema/course';
 import { createRouter } from '../context';
 
 const courseCreateRouter = createRouter().mutation("", {
   input: courseCreateSchema,
   async resolve({ ctx, input }) {
-    const course = await ctx.prisma.course.create({
-      data: {
-        ...input,
-      },
-    });
     await ctx.prisma.teacherEnrollment.create({
       data: {
-        teacherId: ctx.session.user.id,
-        courseId: course.id,
+        teacher: { connect: { id: ctx.session.user.id } },
+        course: {
+          create: {
+            blogHeader: {
+              create: {
+                ...input,
+                blogContent: {
+                  create: {},
+                },
+              },
+            },
+          },
+        },
       },
     });
   },
@@ -33,6 +41,7 @@ const courseReadRouter = createRouter()
               id,
               published: true,
             },
+            include: { blogHeader: { include: { blogContent: true } } },
           });
         },
       })
@@ -43,6 +52,7 @@ const courseReadRouter = createRouter()
               students: { some: { studentId: ctx.session.user.id } },
               published: true,
             },
+            include: { blogHeader: true },
           });
         },
       })
@@ -52,6 +62,7 @@ const courseReadRouter = createRouter()
             where: {
               published: true,
             },
+            include: { blogHeader: true },
           });
         },
       })
@@ -68,6 +79,7 @@ const courseReadRouter = createRouter()
               id,
               teachers: { some: { teacherId: ctx.session.user.id } },
             },
+            include: { blogHeader: { include: { blogContent: true } } },
           });
         },
       })
@@ -77,17 +89,33 @@ const courseReadRouter = createRouter()
             where: {
               teachers: { some: { teacherId: ctx.session.user.id } },
             },
+            include: { blogHeader: true },
           });
         },
       })
   );
 
 const courseUpdateContentRouter = createRouter().mutation("", {
-  input: courseSchema,
+  input: z.object({
+    course: courseSchema,
+    blog: blogSchema,
+  }),
   async resolve({ ctx, input }) {
     await ctx.prisma.course.update({
-      where: { id: input.id },
-      data: { ...input },
+      where: { id: input.course.id },
+      data: {
+        ...input.course,
+        blogHeader: {
+          update: {
+            title: input.blog.title,
+            blogContent: {
+              update: {
+                content: input.blog.content,
+              },
+            },
+          },
+        },
+      },
     });
   },
 });

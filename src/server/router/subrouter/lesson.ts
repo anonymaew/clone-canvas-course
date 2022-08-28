@@ -1,3 +1,6 @@
+import { z } from 'zod';
+
+import { blogSchema } from '../../../schema/blog';
 import { courseIdSchema } from '../../../schema/course';
 import { lessonCreateSchema, lessonIdSchema, lessonSchema } from '../../../schema/lesson';
 import { createRouter } from '../context';
@@ -7,7 +10,15 @@ const lessonCreateRouter = createRouter().mutation("", {
   async resolve({ ctx, input }) {
     await ctx.prisma.lesson.create({
       data: {
-        ...input,
+        course: { connect: { id: input.courseId } },
+        blogHeader: {
+          create: {
+            title: input.title,
+            blogContent: {
+              create: {},
+            },
+          },
+        },
       },
     });
   },
@@ -25,8 +36,8 @@ const lessonReadRouter = createRouter()
             {
               course: {
                 students: { some: { studentId: ctx.session.user.id } },
+                published: true,
               },
-              published: true,
             },
             {
               course: {
@@ -35,6 +46,7 @@ const lessonReadRouter = createRouter()
             },
           ],
         },
+        include: { blogHeader: { include: { blogContent: true } } },
       });
     },
   })
@@ -49,6 +61,7 @@ const lessonReadRouter = createRouter()
             {
               course: {
                 students: { some: { studentId: ctx.session.user.id } },
+                published: true,
               },
             },
             {
@@ -58,20 +71,33 @@ const lessonReadRouter = createRouter()
             },
           ],
         },
+        include: { blogHeader: true },
       });
     },
   });
 
 const lessonUpdateRouter = createRouter().mutation("", {
-  input: lessonSchema,
+  input: z.object({
+    lesson: lessonSchema,
+    blog: blogSchema,
+  }),
   async resolve({ ctx, input }) {
-    await ctx.prisma.lesson.updateMany({
+    await ctx.prisma.lesson.update({
       where: {
-        id: input.id,
-        course: { teachers: { some: { teacherId: ctx.session.user.id } } },
+        id: input.lesson.id,
       },
       data: {
-        ...input,
+        ...input.lesson,
+        blogHeader: {
+          update: {
+            title: input.blog.title,
+            blogContent: {
+              update: {
+                content: input.blog.content,
+              },
+            },
+          },
+        },
       },
     });
   },
@@ -80,10 +106,9 @@ const lessonUpdateRouter = createRouter().mutation("", {
 const lessonDeleteRouter = createRouter().mutation("", {
   input: lessonIdSchema,
   async resolve({ ctx, input }) {
-    await ctx.prisma.lesson.deleteMany({
+    await ctx.prisma.lesson.delete({
       where: {
         id: input,
-        course: { teachers: { some: { teacherId: ctx.session.user.id } } },
       },
     });
   },

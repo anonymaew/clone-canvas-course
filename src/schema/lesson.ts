@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const lessonIdSchema = z.string();
 
@@ -11,9 +11,6 @@ export type lessonCreateType = z.infer<typeof lessonCreateSchema>;
 
 export const lessonSchema = z.object({
   id: lessonIdSchema,
-  title: z.string(),
-  content: z.string(),
-  published: z.boolean(),
 });
 
 export type lessonUpdateType = z.infer<typeof lessonSchema>;

@@ -13,19 +13,6 @@ const LessonList = () => {
     "lesson.read.in-course",
     courseId,
   ]);
-  const lessonListData = {
-    list:
-      data !== undefined
-        ? data.map((lesson) => {
-            return {
-              id: lesson.id,
-              title: lesson.title,
-              created: lesson.created,
-              updated: lesson.updated,
-            };
-          })
-        : [],
-  };
   const { data: enrolled, isLoading: checkLoading } = trpc.useQuery([
     "check.study",
     courseId,
@@ -34,7 +21,7 @@ const LessonList = () => {
   return (
     <Navbar>
       <BlogList
-        data={lessonListData}
+        data={data}
         loading={lessonLoading || checkLoading || status === "loading"}
         enrollLink={`${courseId}/enroll`}
         enrolled={enrolled !== undefined && enrolled.length !== 0}
